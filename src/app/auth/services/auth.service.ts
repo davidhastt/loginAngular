@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, Persona } from '../interfaces/interfaces';
 import {catchError, map} from 'rxjs/operators';
-import { of, tap } from 'rxjs';
+import { of, tap, Observable } from 'rxjs';
 import jwt_decode from "jwt-decode";
 
 
@@ -36,6 +36,8 @@ export class AuthService {
           const token = resp.message.Authorization;
           const decoded: Persona = jwt_decode(token);
           //console.log(decoded);
+          localStorage.setItem('token', token!);
+
           this._usuario={
             id_persona: decoded.id_persona,
             nombre: decoded.nombre,
@@ -55,6 +57,37 @@ export class AuthService {
         catchError(err => of(err.error.message))
     )
 
+}
+
+validarToken(): Observable<boolean>{
+  const url = `${this.baseUrl}api/v1/users/renew`; //hacemos la peticion http
+  const headers = new HttpHeaders()
+    .set('Authorization', localStorage.getItem('token') || '');
+  return this.http.get(url, {headers})
+    .pipe(
+      map( resp =>{
+        const token: string = localStorage.getItem('token') || '';
+        const decoded: Persona = jwt_decode(token);
+        this._usuario={
+          id_persona: decoded.id_persona,
+          nombre: decoded.nombre,
+          email: decoded.email,
+          apaterno: decoded.apaterno,
+          amaterno: decoded.amaterno,
+          genero: decoded.genero,
+          fecha_nac: decoded.fecha_nac,
+          rol: decoded.rol
+        }
+
+        return true;
+      }),
+      catchError(err => of(false))
+    )
+}
+
+
+logout(){
+    localStorage.clear();
 }
 
 }

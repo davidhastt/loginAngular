@@ -22,10 +22,17 @@ export class LoginComponent   {
   constructor(private fb: FormBuilder, private router: Router, private authService: AuthService) { }
 
   Login(){
+
+
+    //this.authService.validarToken()
+    //  .subscribe(console.log);
+
+
+
     //console.log(this.miFormulario.value);
     //console.log(this.miFormulario.valid);
-    const {email, password} = this.miFormulario.value;
 
+    const {email, password} = this.miFormulario.value;
     this.authService.login(email, password)
       .subscribe( ok =>{
         console.log(ok);
